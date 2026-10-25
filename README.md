@@ -73,4 +73,5 @@ de novo pro 2º. Se sobreviver a ambos, foi bom demais pra morrer.
 
 ## Licença
 
-MIT — faça o que quiser, do slop que quiser.
+WTFNMFPL v1 ("Do What The Fuck You Want To But It's Not My Fault") — a evolução da
+WTFPL. Faz o que quiser com o slop, e se der problema, problema seu.
