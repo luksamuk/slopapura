@@ -80,36 +80,36 @@ footer{margin-top:18px;font-size:.7rem;color:var(--muted);text-align:center}
     <option value="2" selected>2º turno (dia D)</option>
     <option value="1">1º turno (fechado)</option>
   </select>
-  <label title="Ctrl+click (ou clique arrastando) pra escolher vários estados — gov+sen+deputados de cada">
-    Estado(s):</label>
-  <select id="uf" multiple size="9">
-    <option value="MG" selected>MG — Minas Gerais</option>
-    <option value="AC">AC — Acre</option>
-    <option value="AL">AL — Alagoas</option>
-    <option value="AP">AP — Amapá</option>
-    <option value="AM">AM — Amazonas</option>
-    <option value="BA">BA — Bahia</option>
-    <option value="CE">CE — Ceará</option>
-    <option value="DF">DF — Distrito Federal</option>
-    <option value="ES">ES — Espírito Santo</option>
-    <option value="GO">GO — Goiás</option>
-    <option value="MA">MA — Maranhão</option>
-    <option value="MT">MT — Mato Grosso</option>
-    <option value="MS">MS — Mato Grosso do Sul</option>
-    <option value="PA">PA — Pará</option>
-    <option value="PB">PB — Paraíba</option>
-    <option value="PR">PR — Paraná</option>
-    <option value="PE">PE — Pernambuco</option>
-    <option value="PI">PI — Piauí</option>
-    <option value="RN">RN — Rio Grande do Norte</option>
-    <option value="RJ">RJ — Rio de Janeiro</option>
-    <option value="RS">RS — Rio Grande do Sul</option>
-    <option value="RO">RO — Rondônia</option>
-    <option value="RR">RR — Roraima</option>
-    <option value="SC">SC — Santa Catarina</option>
-    <option value="SP">SP — São Paulo</option>
-    <option value="SE">SE — Sergipe</option>
-    <option value="TO">TO — Tocantins</option>
+  <label>Estado:</label>
+  <select id="uf">
+    <option value="mg" selected>MG — Minas Gerais</option>
+    <option value="todos">— TODOS os estados —</option>
+    <option value="ac">AC — Acre</option>
+    <option value="al">AL — Alagoas</option>
+    <option value="ap">AP — Amapá</option>
+    <option value="am">AM — Amazonas</option>
+    <option value="ba">BA — Bahia</option>
+    <option value="ce">CE — Ceará</option>
+    <option value="df">DF — Distrito Federal</option>
+    <option value="es">ES — Espírito Santo</option>
+    <option value="go">GO — Goiás</option>
+    <option value="ma">MA — Maranhão</option>
+    <option value="mt">MT — Mato Grosso</option>
+    <option value="ms">MS — Mato Grosso do Sul</option>
+    <option value="pa">PA — Pará</option>
+    <option value="pb">PB — Paraíba</option>
+    <option value="pr">PR — Paraná</option>
+    <option value="pe">PE — Pernambuco</option>
+    <option value="pi">PI — Piauí</option>
+    <option value="rn">RN — Rio Grande do Norte</option>
+    <option value="rj">RJ — Rio de Janeiro</option>
+    <option value="rs">RS — Rio Grande do Sul</option>
+    <option value="ro">RO — Rondônia</option>
+    <option value="rr">RR — Roraima</option>
+    <option value="sc">SC — Santa Catarina</option>
+    <option value="sp">SP — São Paulo</option>
+    <option value="se">SE — Sergipe</option>
+    <option value="to">TO — Tocantins</option>
   </select>
   <label><input type="checkbox" id="br" checked title="carimbo do presidente (abrangência nacional, em todos os turnos)"> Pres. BR</label>
   <button id="btn-auto">Auto 5min: ON</button>
@@ -192,10 +192,10 @@ function setStatus(msg, isErr=false){ $('#status').textContent = msg; $('#status
 async function refresh(){
   try{
     setStatus('atualizando…');
-    const ufs = [
-      ($('#br') && $('#br').checked ? 'br' : null),
-      ...[...$('#uf').selectedOptions].map(o => o.value),
-    ].filter(v => v).join(',') || 'br';
+    const ESTADOS = ['ac','al','ap','am','ba','ce','df','es','go','ma','mt','ms','mg','pa','pb','pr','pe','pi','rn','rj','rs','ro','rr','sc','sp','se','to'];
+    const val = $('#uf').value;
+    const lista = (val === 'todos') ? ESTADOS : [val];
+    const ufs = [($('#br') && $('#br').checked ? 'br' : null), ...lista].filter(v => v).join(',') || 'br';
     const turno = encodeURIComponent($('#turno') ? $('#turno').value : '1');
     const r = await fetch(`${APIDOM}/api/painel?ufs=${encodeURIComponent(ufs)}&turno=${turno}`);
     if(!r.ok) throw new Error(await r.text());
