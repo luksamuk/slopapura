@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apuração 2026 — TSE ao vivo</title>
+<style>
+:root{
+  --bg:#0d1117; --card:#161b22; --border:#30363d; --text:#e6edf3; --muted:#8b949e;
+  --pt:#ff6b6b; --pl:#5b9bff; --green:#3fb950; --yellow:#d29922; --purple:#bc8cff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:16px}
+header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:1.4rem}
+.sub{color:var(--muted);font-size:.85rem}
+.clock{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--muted);font-size:.85rem}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.controls label{font-size:.8rem;color:var(--muted)}
+.controls select,.controls button{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:.85rem}
+.controls button{cursor:pointer}
+#status{font-size:.75rem;color:var(--muted)}
+.grid{display:grid;grid-auto-flow:column;grid-auto-columns:360px;gap:14px;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x proximity}
+.grid .card{scroll-snap-align:start}
+.grid::-webkit-scrollbar{height:8px}
+.grid::-webkit-scrollbar-track{background:#21262d;border-radius:4px}
+.grid::-webkit-scrollbar-thumb{background:#3d444d;border-radius:4px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px}
+.card h2{font-size:.95rem;margin-bottom:2px}
+.card .meta{font-size:.72rem;color:var(--muted);margin-bottom:10px}
+.bars{display:flex;flex-direction:column;gap:10px}
+.row .top{display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:3px}
+.row .top .nm b{margin-right:6px}
+.row .top .v{font-variant-numeric:tabular-nums}
+.row .bar{height:8px;border-radius:4px;background:#21262d;overflow:hidden}
+.row .bar .fill{height:100%;border-radius:4px;transition:width .6s ease}
+.row .sub2{font-size:.7rem;color:var(--muted);margin-top:2px}
+.totais{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.totais div{font-size:.68rem;color:var(--muted)}
+.totais b{display:block;color:var(--text);font-size:.9rem;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;font-size:.6rem;padding:1px 6px;border-radius:4px;background:#1c2530;color:#58a6ff;margin-left:6px}
+.mock .meta::before{content:"⚠ dados de teste (fixture 2022) — não é apuração real";display:block;color:#d29922;font-size:.68rem;margin-bottom:4px}
+.mockb{background:#3a2d12;color:#d29922}
+.liveb{background:#12331f;color:#3fb950}
+.card.mock{border-color:#5a4a1e}
+.eleito{background:#12331f;color:#3fb950}
+.eleito-nm{color:#3fb950;font-weight:700;text-shadow:0 0 6px rgba(63,185,80,.25)}
+.projnota{color:#22d3ee;font-size:.68rem;opacity:.85;margin:2px 0}
+.projeleito{background:#0e2a33;color:#22d3ee;border:1px solid #155e75}
+.row .nm .foto,.row .nm .avatar{width:20px;height:20px;border-radius:50%;vertical-align:-4px;margin-right:5px;
+  object-fit:cover;background:#21262d;display:inline-flex;align-items:center;justify-content:center;
+  font-size:.55rem;font-weight:700;color:#e6edf3;overflow:hidden}
+.row{position:relative}
+.tip{position:absolute;top:calc(100% + 3px);left:8px;background:#1b2230;border:1px solid #3b4a63;border-radius:8px;
+  padding:8px 10px;font-size:.72rem;line-height:1.5;color:#c9d4e3;display:none;z-index:50;white-space:nowrap;box-shadow:0 8px 22px rgba(0,0,0,.55);overflow:auto;max-width:calc(100vw - 420px)}
+.row:hover .tip{display:block}
+.tip b{color:#e6edf3}
+.card{position:relative}
+.card .meta{cursor:help}
+.card .meta:hover .tipcard{display:block}
+.tipcard{position:absolute;bottom:calc(100% + 4px);left:10px;background:#1b2230;border:1px solid #3b4a63;border-radius:8px;
+  padding:8px 10px;font-size:.72rem;line-height:1.5;color:#c9d4e3;display:none;z-index:50;white-space:nowrap;box-shadow:0 8px 22px rgba(0,0,0,.55)}
+.card .meta:hover .tipcard{display:block}
+.muted-note{font-size:.72rem;color:var(--muted);margin-top:14px;text-align:center}
+.err{color:#f85149}
+footer{margin-top:18px;font-size:.7rem;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <h1>Apuração 2026</h1>
+  <span class="sub">divulgação oficial TSE — resultados parciais</span>
+  <span class="clock" id="clock"></span>
+</header>
+
+<div class="controls">
+  <label>UF(s):</label>
+  <select id="uf">
+    <option value="br,mg" selected>Pres. BR + MG completo</option>
+    <option value="br">Pres. BR</option>
+    <option value="br,mg,sp">BR+MG+SP</option>
+    <option value="mg">Só MG (gov+sen+deps)</option>
+  </select>
+  <button id="btn-auto">Auto 5min: ON</button>
+  <button id="btn-demo" title="carrega dados reais do TSE 2022 (fixture) pra testar o render">Demo 2022</button>
+  <button id="btn-mock" title="5 cards mock (2022 clonado) pra ver o layout multicoluna">Mock 5col</button>
+  <span id="status"></span>
+</div>
+
+<div class="grid" id="grid"></div>
+<p class="muted-note" id="note"></p>
+<footer>Fonte: resultados.tse.jus.br (divulgação oficial) · cache 45s · projeto local descartável</footer>
+
+<script>
+const $ = s => document.querySelector(s);
+const PALETTE = ['#ff6b6b','#5b9bff','#3fb950','#d29922','#bc8cff','#39c5cf','#ff9f43','', '#f778ba','#9ae6ae'];
+let auto = true, timer = null;
+const APIDOM = `http://${location.hostname}:8891`;
+
+function clock(){ $('#clock').textContent = new Date().toLocaleTimeString('pt-BR'); }
+setInterval(clock, 1000); clock();
+
+function barColor(i){ return PALETTE[i % (PALETTE.length-1)]; }
+
+function card(r){
+  const cands = r.candidatos || [];
+  const rows = cands.map((c,i) => {
+    const pct = (c.pct||0).toFixed(2).replace('.',',');
+    const votos = (c.votos||0).toLocaleString('pt-BR');
+    const badge = c.eleito ? `<span class="badge eleito">${c.situacao||'Eleito'}</span>`
+                 : (c.proj_eleito ? `<span class="badge projeleito">${c.proj_tipo||'Eleito (proj.)'}</span>`
+                 : (c.situacao ? `<span class="badge">${c.situacao}</span>` : ''));
+    const nmClass = (c.eleito || c.proj_eleito) ? 'eleito-nm' : '';
+    const PARTCORES = ['PL','PT','PSB','PDT','MDB','UN','PP','PSD','RE','PO','PSOL','PC','PV','C','NO','MO','AG','SA','CI','MB'];
+    const CORES = ['#ff6b6b','#4ecdc4','#45b7d1','#f9a825','#ab47bc','#66bb6a','#ef5350','#26c6da','#8d6e63','#7e57c2','#29b6f6','#9ccc65','#ffa726','#ec407a','#26a69a','#5c6bc0','#d4e157','#ff7043','#42a5f5','#8d6e63'];
+    const pi = PARTCORES.findIndex(p => (c.partido||'').toUpperCase().startsWith(p));
+    const cor = CORES[(pi >= 0 ? pi : (c.numero||0) % CORES.length) % CORES.length];
+    const iniciais = (c.nome||'?').split(/\s+/).slice(0,2).map(s => s[0]||'').join('').toUpperCase();
+    const avatar = c.foto
+      ? `<span class="foto"><img style="width:100%;height:100%;object-fit:cover" src="${c.foto}/foto" alt="" loading="lazy"
+           onerror="this.parentNode.textContent='${iniciais}';this.parentNode.style.background='${cor}'"></span>`
+      : `<span class="foto" style="background:${cor}">${iniciais}</span>`;
+    const vice = c.vice ? `<span style="color:var(--muted)"> · vice ${(c.vice||'').slice(0,18)}</span>` : '';
+    const tip = `<div class="tip">
+      <b>${c.nome_completo||c.nome||''}</b>${c.nascimento||'' ? ' · nasceu em '+c.nascimento : ''}<br>
+      seq ${c.seq??'?'} · nº ${c.numero} · ${c.tipo_voto||'Válido'}<br>
+      ${c.coligacao||c.partido||''}<br>
+      %: ${(c.pct||0).toFixed(2).replace('.',',')} (exato ${(c.pct_exato||0).toFixed(6).replace('.',',')})<br>
+      ${c.votos.toLocaleString('pt-BR')} votos nominais${c.vice? '<br>vice: '+c.vice+(c.foto?' · foto: TSE divulga':'') : ''}
+    </div>`;
+    return `<div class="row">${tip}
+      <div class="top"><span class="nm">${avatar}<b>${c.numero??''}</b><span class="${nmClass}">${(c.nome||'').slice(0,26)}</span>${badge}</span>
+      <span class="v">${pct}% · ${votos}</span></div>
+      <div class="bar"><div class="fill" style="width:${Math.max(c.pct||0,0.8)}%;background:${barColor(i)}"></div></div>
+      <div class="sub2">${(c.coligacao||c.partido||'').slice(0,70)}${vice}</div>
+    </div>`;
+  }).join('');
+  const t = r.votos||{}, e = r.eleitorado||{}, s = r.secoes||{};
+  const tipcard = `<div class="tipcard">
+      <b>${r.cargo} ${r.abrangencia}</b> — eleição ${r.eleicao_codigo||'?'} · turno ${r.turno||1}<br>
+      votos válidos: ${(t.validos||0).toLocaleString('pt-BR')} · nominais: ${(t.validos_nominais||0).toLocaleString('pt-BR')}<br>
+      brancos: ${(t.brancos||0).toLocaleString('pt-BR')} · nulos: ${(t.nulos||0).toLocaleString('pt-BR')}<br>
+      seções instanciadas: ${(s.instanciadas||0).toLocaleString('pt-BR')} · ativas: ${(s.ativas||0).toLocaleString('pt-BR')}<br>
+      pendentes: ${(s.nao_transmitidas||0).toLocaleString('pt-BR')} · dados válidos: ${r.dados_validos?'sim':'não'}<br>
+      totalização final: ${r.totalizacao_final?'SIM':'não'} · id geração: ${r.id_geracao||'?'}
+    </div>`;
+  return `<div class="card${r.mock ? ' mock' : ''}">
+    ${r.mock ? '' : tipcard}
+    <h2>${r.cargo} <span style="color:var(--muted)">· ${r.abrangencia}</span>${r.mock ? '<span class="badge mockb">MOCK</span>' : '<span class="badge liveb">AO VIVO</span>'}${r.matematicamente_definido ? '<span class="badge liveb">DEFINIDO</span>' : ''}</h2>
+    ${r.proj_nota ? `<div class="projnota">ⓘ projeção local (não oficial): ${r.proj_nota}</div>` : ''}
+    <div class="meta">TSE: ${r.atualizado_tse}${r.transmissao_tse ? ' (tx '+r.transmissao_tse+')' : ''} · apurado ${String(r.apurado_pct).replace('.',',')}% · seções ${s.totalizadas}/${s.total}${s.nao_transmitidas ? ' ('+s.nao_transmitidas+' pendentes)' : ''}</div>
+    <div class="bars">${rows || '<i style="color:var(--muted)">sem dados ainda</i>'}</div>
+    <div class="totais">
+      <div>Comparecimento<b>${(e.comparecimento||0).toLocaleString('pt-BR')} (${String(e.comparecimento_pct).replace('.',',')}%)</b></div>
+      <div>Brancos<b>${(t.brancos||0).toLocaleString('pt-BR')} (${String(t.brancos_pct||0).replace('.',',')}%)</b></div>
+      <div>Nulos<b>${(t.nulos||0).toLocaleString('pt-BR')} (${String(t.nulos_pct||0).replace('.',',')}%)</b></div>
+    </div>
+  </div>`;
+}
+
+function setStatus(msg, isErr=false){ $('#status').textContent = msg; $('#status').className = isErr?'err':''; }
+
+async function refresh(){
+  try{
+    setStatus('atualizando…');
+    const uf = encodeURIComponent($('#uf').value);
+    const r = await fetch(`${APIDOM}/api/painel?ufs=${uf}`);
+    if(!r.ok) throw new Error(await r.text());
+    const d = await r.json();
+    const rs = d.resultados||[];
+    $('#grid').innerHTML = rs.length ? rs.map(card).join('') :
+      '<div class="card"><h2>Apuração 2026</h2><div class="meta">Aguardando o TSE…</div>' +
+      '<i style="color:var(--muted);font-size:.85rem">Os arquivos oficiais da totalização ainda não foram publicados.<br>' +
+      'Histórico de eleições anteriores: começam a aparecer entre 17h30 e 18h15.<br>' +
+      'Este painel atualiza sozinho a cada 5 minutos — sem recarregar.</i></div>';
+    const ts = rs[0]?.atualizado_tse || '';
+    setStatus(`ok — TSE: ${ts}`);
+    $('#note').textContent = 'Percentuais e horário são os publicados pelo TSE (horário de Brasília). Sem projeção — totais oficiais parciais.';
+  }catch(e){
+    setStatus('erro: ' + (e.message||e), true);
+    $('#note').textContent = 'Se "ainda não publicado": os arquivos nascem quando a apuração começa (após 17h).';
+  }
+}
+
+function setAuto(on){
+  auto = on;
+  $('#btn-auto').textContent = 'Auto 5min: ' + (on?'ON':'OFF');
+  if(timer){ clearInterval(timer); timer=null; }
+  if(on){ timer = setInterval(refresh, 300000); }
+}
+$('#btn-mock').onclick = async () => {
+  try{
+    const r = await fetch(`${APIDOM}/api/painel?mock=true`);
+    const d = await r.json();
+    $('#grid').innerHTML = (d.resultados||[]).map(card).join('');
+    setStatus('MOCK 5 colunas (layout check)');
+    $('#note').textContent = 'Cards mock com dados clonados do TSE 2022 — só pra validar o layout multicoluna pré-17h.';
+  }catch(e){ setStatus('mock erro: '+e.message, true); }
+};
+$('#btn-demo').onclick = async () => {
+  try{
+    const r = await fetch(APIDOM + '/api/demo');
+    const d = await r.json();
+    $('#grid').innerHTML = card(d);
+    setStatus('DEMO (fixture TSE 2022)');
+    $('#note').textContent = 'Dados do TSE 2022 (teste de render). O painel real ativa quando o TSE publica (após 17h).';
+  }catch(e){ setStatus('demo erro: '+e.message, true); }
+};
+$('#btn-auto').onclick = () => setAuto(!auto);
+$('#uf').onchange = refresh;
+setAuto(true); refresh();
+const QP = new URLSearchParams(location.search);
+if(QP.get('demo')){ setTimeout(()=>{ try{ document.getElementById('btn-demo').click(); }catch(e){} }, 800); }
+else if(QP.get('mock')){ setTimeout(()=>{ try{ document.getElementById('btn-mock').click(); }catch(e){} }, 800); }
+</script>
+</body>
+</html>

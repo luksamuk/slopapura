@@ -1,0 +1,3 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+# httpx desnecessário — urllib stdlib basta (sem deps de rede além de fastapi)
