@@ -20,6 +20,7 @@ h1{font-size:1.4rem}
 .controls select,.controls button{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:.85rem}
 .controls button{cursor:pointer}
 #status{font-size:.75rem;color:var(--muted)}
+#uf{width:210px}
 .grid{display:grid;grid-auto-flow:column;grid-auto-columns:360px;gap:14px;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x proximity}
 .grid .card{scroll-snap-align:start}
 .grid::-webkit-scrollbar{height:8px}
@@ -79,16 +80,39 @@ footer{margin-top:18px;font-size:.7rem;color:var(--muted);text-align:center}
     <option value="2" selected>2º turno (dia D)</option>
     <option value="1">1º turno (fechado)</option>
   </select>
-  <label>UF(s):</label>
-  <select id="uf">
-    <option value="br,mg" selected>Pres. BR + MG completo</option>
-    <option value="br">Pres. BR</option>
-    <option value="br,mg,sp">BR+MG+SP</option>
-    <option value="mg">Só MG (gov+sen+deps)</option>
+  <label title="Ctrl+click (ou clique arrastando) pra escolher vários estados — gov+sen+deputados de cada">
+    Estado(s):</label>
+  <select id="uf" multiple size="9">
+    <option value="MG" selected>MG — Minas Gerais</option>
+    <option value="AC">AC — Acre</option>
+    <option value="AL">AL — Alagoas</option>
+    <option value="AP">AP — Amapá</option>
+    <option value="AM">AM — Amazonas</option>
+    <option value="BA">BA — Bahia</option>
+    <option value="CE">CE — Ceará</option>
+    <option value="DF">DF — Distrito Federal</option>
+    <option value="ES">ES — Espírito Santo</option>
+    <option value="GO">GO — Goiás</option>
+    <option value="MA">MA — Maranhão</option>
+    <option value="MT">MT — Mato Grosso</option>
+    <option value="MS">MS — Mato Grosso do Sul</option>
+    <option value="PA">PA — Pará</option>
+    <option value="PB">PB — Paraíba</option>
+    <option value="PR">PR — Paraná</option>
+    <option value="PE">PE — Pernambuco</option>
+    <option value="PI">PI — Piauí</option>
+    <option value="RN">RN — Rio Grande do Norte</option>
+    <option value="RJ">RJ — Rio de Janeiro</option>
+    <option value="RS">RS — Rio Grande do Sul</option>
+    <option value="RO">RO — Rondônia</option>
+    <option value="RR">RR — Roraima</option>
+    <option value="SC">SC — Santa Catarina</option>
+    <option value="SP">SP — São Paulo</option>
+    <option value="SE">SE — Sergipe</option>
+    <option value="TO">TO — Tocantins</option>
   </select>
+  <label><input type="checkbox" id="br" checked title="carimbo do presidente (abrangência nacional, em todos os turnos)"> Pres. BR</label>
   <button id="btn-auto">Auto 5min: ON</button>
-  <button id="btn-demo" title="carrega dados reais do TSE 2022 (fixture) pra testar o render">Demo 2022</button>
-  <button id="btn-mock" title="5 cards mock (2022 clonado) pra ver o layout multicoluna">Mock 5col</button>
   <span id="status"></span>
 </div>
 
@@ -168,9 +192,12 @@ function setStatus(msg, isErr=false){ $('#status').textContent = msg; $('#status
 async function refresh(){
   try{
     setStatus('atualizando…');
-    const uf = encodeURIComponent($('#uf').value);
+    const ufs = [
+      ($('#br') && $('#br').checked ? 'br' : null),
+      ...[...$('#uf').selectedOptions].map(o => o.value),
+    ].filter(v => v).join(',') || 'br';
     const turno = encodeURIComponent($('#turno') ? $('#turno').value : '1');
-    const r = await fetch(`${APIDOM}/api/painel?ufs=${uf}&turno=${turno}`);
+    const r = await fetch(`${APIDOM}/api/painel?ufs=${encodeURIComponent(ufs)}&turno=${turno}`);
     if(!r.ok) throw new Error(await r.text());
     const d = await r.json();
     const rs = d.resultados||[];
@@ -181,7 +208,7 @@ async function refresh(){
       'Este painel atualiza sozinho a cada 5 minutos — sem recarregar.</i></div>';
     const ts = rs[0]?.atualizado_tse || '';
     setStatus(`ok — TSE: ${ts}`);
-    $('#note').textContent = 'Percentuais e horário são os publicados pelo TSE (horário de Brasília). Sem projeção — totais oficiais parciais.';
+    $('#note').textContent = 'Percentuais e horário: publicação oficial do TSE (horário de Brasília). "eleito (proj.)" = projeção local conservadora, não oficial. Deputados: lista nominal, não é a eleição.';
   }catch(e){
     setStatus('erro: ' + (e.message||e), true);
     $('#note').textContent = 'Se "ainda não publicado": os arquivos nascem quando a apuração começa (após 17h).';
@@ -194,31 +221,11 @@ function setAuto(on){
   if(timer){ clearInterval(timer); timer=null; }
   if(on){ timer = setInterval(refresh, 300000); }
 }
-$('#btn-mock').onclick = async () => {
-  try{
-    const r = await fetch(`${APIDOM}/api/painel?mock=true`);
-    const d = await r.json();
-    $('#grid').innerHTML = (d.resultados||[]).map(card).join('');
-    setStatus('MOCK 5 colunas (layout check)');
-    $('#note').textContent = 'Cards mock com dados clonados do TSE 2022 — só pra validar o layout multicoluna pré-17h.';
-  }catch(e){ setStatus('mock erro: '+e.message, true); }
-};
-$('#btn-demo').onclick = async () => {
-  try{
-    const r = await fetch(APIDOM + '/api/demo');
-    const d = await r.json();
-    $('#grid').innerHTML = card(d);
-    setStatus('DEMO (fixture TSE 2022)');
-    $('#note').textContent = 'Dados do TSE 2022 (teste de render). O painel real ativa quando o TSE publica (após 17h).';
-  }catch(e){ setStatus('demo erro: '+e.message, true); }
-};
 $('#btn-auto').onclick = () => setAuto(!auto);
 $('#uf').onchange = refresh;
+$('#br').onchange = refresh;
 $('#turno').onchange = refresh;
 setAuto(true); refresh();
-const QP = new URLSearchParams(location.search);
-if(QP.get('demo')){ setTimeout(()=>{ try{ document.getElementById('btn-demo').click(); }catch(e){} }, 800); }
-else if(QP.get('mock')){ setTimeout(()=>{ try{ document.getElementById('btn-mock').click(); }catch(e){} }, 800); }
 </script>
 </body>
 </html>

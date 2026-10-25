@@ -10,6 +10,7 @@ Endpoints:
   GET /api/painel?ufs=&turno=        snapshot agregado pro dashboard (mock=true = layout)
 """
 import json as _json
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -103,17 +104,23 @@ def painel(
     os finalizados no 1ºT simplesmente não aparecem (404 no feed do 2ºT)."""
     if mock:
         return _demo_multi(turno)
-    out = []
+
+    def _normaliza_silencioso(uf: str, cargo_cd: int):
+        try:
+            return normaliza(resultado_bruto(uf, cargo_cd, turno), uf, cargo_cd, limite)
+        except Exception:
+            return None
+
+    alvos = []
     for uf in [u.strip().lower() for u in ufs.split(",") if u.strip()]:
-        cargos = [1] if uf == "br" else [3, 5, 6, 7]
-        for cargo_cd in cargos:
-            try:
-                raw = resultado_bruto(uf, cargo_cd, turno)
-            except Exception:
-                raw = None
-            n = normaliza(raw, uf, cargo_cd, limite)
-            if n:
-                out.append(n)
+        for cargo_cd in ([1] if uf == "br" else [3, 5, 6, 7]):
+            alvos.append((uf, cargo_cd))
+    # fetch paralelo (o cache fica no tse_client por URL) — 27 UFs × 4 cargos em série estouraria
+    # o timeout de 25s do proxy do front na primeira passada fria
+    out = []
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        futuros = [ex.submit(_normaliza_silencioso, uf, c) for uf, c in alvos]
+        out = [n for n in (f.result() for f in futuros) if n]  # ordem de submissão = ordem UFs/cargos
     if not out:
         avisos = ["Ainda sem dados publicados pelo TSE — a apuração começa a aparecer quando os arquivos forem gerados. "
                   "Histórico: entre 17h30 e 18h15 no dia D." + (" Em 2º turno, só cargos em disputa aparecem." if turno == 2 else "")]
