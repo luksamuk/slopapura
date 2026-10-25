@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Apuração 2026 — TSE ao vivo</title>
+<title>SLOPAPURA — Apuração 2026 (TSE) ao vivo</title>
 <style>
 :root{
   --bg:#0d1117; --card:#161b22; --border:#30363d; --text:#e6edf3; --muted:#8b949e;
@@ -69,11 +69,16 @@ footer{margin-top:18px;font-size:.7rem;color:var(--muted);text-align:center}
 <body>
 <header>
   <h1>Apuração 2026</h1>
-  <span class="sub">divulgação oficial TSE — resultados parciais</span>
+  <span class="sub">SLOPAPURA · divulgação oficial TSE — resultados parciais</span>
   <span class="clock" id="clock"></span>
 </header>
 
 <div class="controls">
+  <label>Turno:</label>
+  <select id="turno">
+    <option value="2" selected>2º turno (dia D)</option>
+    <option value="1">1º turno (fechado)</option>
+  </select>
   <label>UF(s):</label>
   <select id="uf">
     <option value="br,mg" selected>Pres. BR + MG completo</option>
@@ -89,7 +94,7 @@ footer{margin-top:18px;font-size:.7rem;color:var(--muted);text-align:center}
 
 <div class="grid" id="grid"></div>
 <p class="muted-note" id="note"></p>
-<footer>Fonte: resultados.tse.jus.br (divulgação oficial) · cache 45s · projeto local descartável</footer>
+<footer>Fonte: resultados.tse.jus.br (divulgação oficial) · cache 270s · SLOPAPURA — 100% vibecoded, sem garantia de nada (LICENSE MIT)</footer>
 
 <script>
 const $ = s => document.querySelector(s);
@@ -164,7 +169,8 @@ async function refresh(){
   try{
     setStatus('atualizando…');
     const uf = encodeURIComponent($('#uf').value);
-    const r = await fetch(`${APIDOM}/api/painel?ufs=${uf}`);
+    const turno = encodeURIComponent($('#turno') ? $('#turno').value : '1');
+    const r = await fetch(`${APIDOM}/api/painel?ufs=${uf}&turno=${turno}`);
     if(!r.ok) throw new Error(await r.text());
     const d = await r.json();
     const rs = d.resultados||[];
@@ -208,6 +214,7 @@ $('#btn-demo').onclick = async () => {
 };
 $('#btn-auto').onclick = () => setAuto(!auto);
 $('#uf').onchange = refresh;
+$('#turno').onchange = refresh;
 setAuto(true); refresh();
 const QP = new URLSearchParams(location.search);
 if(QP.get('demo')){ setTimeout(()=>{ try{ document.getElementById('btn-demo').click(); }catch(e){} }, 800); }
