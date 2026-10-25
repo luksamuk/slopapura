@@ -1,5 +1,5 @@
 #!/bin/bash
-# SLOPAPURA — sobe tudo local sem Docker (venv backend + servidor único python).
+# SlopApura — sobe tudo local sem Docker (venv backend + servidor único python).
 # Docker é opcional: backend/Dockerfile. `up.sh` sobe de novo sem rebuild; `down.sh` mata tudo.
 set -e
 DIR="$(cd "$(dirname "$0")" && pwd)"

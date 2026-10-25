@@ -1,4 +1,4 @@
-# SLOPAPURA
+# SlopApura
 
 **slop + apuração.** Um dashboard pra acompanhar a totalização oficial do TSE
 (eleições federais/estaduais de 2026) em tempo real, direto dos JSONs de divulgação

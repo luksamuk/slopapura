@@ -13,7 +13,7 @@ from urllib.error import HTTPError
 
 TSE_BASE = "https://resultados.tse.jus.br/oficial"
 CONFIG_URL = f"{TSE_BASE}/comum/config/ele-c.json"
-UA = "slopatura/0.2 (projeto local, cache >=270s, sem chave, sem cadastro)"
+UA = "SlopApura/0.2 (projeto local, cache >=270s, sem chave, sem cadastro)"
 
 # ele2026 (do config canônico, dg 02/10/2026): 1ºT federal=6257 / 2ºT=6258; 1ºT estadual=6259 / 2ºT=6260.
 ELE2026 = {"federal_1t": "6257", "federal_2t": "6258", "estadual_1t": "6259", "estadual_2t": "6260"}

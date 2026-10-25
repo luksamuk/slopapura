@@ -22,7 +22,7 @@ from tse_client import CONFIG_URL, CARGO_NOMES, _fetch_json, resultado_bruto
 
 FIXTURE = Path(__file__).parent / "demo_fixture.json"
 
-app = FastAPI(title="SLOPAPURA — API da apuração TSE 2026", version="0.2")
+app = FastAPI(title="SlopApura — API da apuração TSE 2026", version="0.2")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
