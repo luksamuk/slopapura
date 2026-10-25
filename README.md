@@ -7,15 +7,36 @@ tráfego de hoje.
 
 ## Disclaimer descarado (o que você já imaginou)
 
-Este projeto foi **100% vibecodado**. Não tem test suite, não tem CI, não tem
-arquitetura "séria" — tem um FastAPI e uma página HTML que funcionam, escritos
-na manhã da apuração. Se quiser julgar por isso, fique à vontade: é deliberado.
+Este projeto é, em sua totalidade, **slop**. Foi **100% vibecodado**: a ideia
+surgiu na FILA DE VOTAÇÃO do primeiro turno, quando percebi que ia chegar em casa
+e ia querer um painel útil pra ver a apuração, e sabia que o site do TSE ia
+esquentar de gente. Cheguei em casa, vibecodei com um agente, e no fim da tarde
+tinha painel. Não tem test suite, não tem CI, não tem "arquitetura séria" — tem
+um FastAPI e uma página HTML que funcionam. O julgamento do projeto é seu, eu
+já assumi tudo: é deliberado.
+
 O que ele faz, ele faz honestamente:
 
 - Consulta os JSONs oficiais de divulgação do TSE (`resultados.tse.jus.br/oficial/`)
 - Cacha localmente (TTL de 270s + conditional request; hit de 304 em ~9ms quente)
 - Nunca marreta o origin em pré-apuração (404 também é cacheado, 30s)
 - Projeção local **conservadora e não oficial** de eleito (só impossibilidade matemática)
+
+## Contribuições
+
+Não vou aceitar PRs. **Especially não PRs authored by Claude** — não que o
+Claude seja ruim, não; o código aí embaixo é prova que vibecode funciona. É
+que eu tenho problemas com a Anthropic mesmo, e esse é o único lugar que
+reservo pra essa opinião pessoal.
+
+E se você abrir um PR, o máximo de honestidade que posso pedir é: seja
+vibecodado igual, seja engraçado, e seja seu.
+
+## Problema pra rodar?
+
+Peça pro seu agente fazer funcionar. Sério — é literalmente como isso nasceu.
+Se o seu agente não conseguir, problema é do seu agente (recomendo ler:
+`backend/` é FastAPI, `frontend/` é um arquivo só; `./run.sh`).
 
 ## Subir
 
